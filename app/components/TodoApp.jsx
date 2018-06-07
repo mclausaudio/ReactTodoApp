@@ -1,31 +1,22 @@
 var React = require('react');
+var uuid = require('node-uuid');
+
 var TodoList = require('TodoList');
 var AddTodo = require('AddTodo');
 var TodoSearch = require('TodoSearch');
-var uuid = require('node-uuid');
+var TodoAPI = require('TodoAPI');
+
 
 var TodoApp = React.createClass({
     getInitialState: function () {
         return {
             showCompleted: false,
             searchText: '',
-            todos: [
-                {
-                    id: uuid(),
-                    text: "Get soap from farmer's market"
-                }, {
-                    id: uuid(),
-                    text: "Walk to summit hill"
-                }, {
-                    id: uuid(),
-                    text: "Study react"
-                }, {
-                    id: uuid(),
-                    text: "text cassidy"
-                }
-            ]
-        }
-            
+            todos: TodoAPI.getTodos()
+        };
+    },
+    componentDidUpdate: function () {
+        TodoAPI.setTodos(this.state.todos);
     },
     handleAddTodo: function (text) {
      this.setState({
@@ -33,10 +24,20 @@ var TodoApp = React.createClass({
              ...this.state.todos,
              {
                  id: uuid(),
-                 text: text
+                 text: text,
+                 completed: false
              }
              ]
      })    
+    },
+    handleToggle: function (id) {
+        var updatedTodos = this.state.todos.map((todo) => {
+            if (todo.id === id) {
+                todo.completed = !todo.completed;
+            }
+            return todo
+        })
+        this.setState({todos: updatedTodos})
     },
     handleSearch: function (showCompleted, searchText) {
         this.setState({
@@ -50,7 +51,7 @@ var TodoApp = React.createClass({
         return (
          <div>
             <TodoSearch onSearch={this.handleSearch}/>
-            <TodoList todos={todos}/>
+            <TodoList todos={todos} onToggle={this.handleToggle}/>
             <AddTodo onAddTodo={this.handleAddTodo}/>
          </div>   
         )
